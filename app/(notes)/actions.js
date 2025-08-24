@@ -41,7 +41,6 @@ export async function updateNote(formData){
   const content = String(formData.get('content') || '');
 
   if (!id || !title) redirect(`/notes/${id}`);
-
   await supabase.from('notes').update({title,content}).eq('id', id).eq('user_id', user.id)
 
   revalidatePath('dashboard');
