@@ -1,8 +1,10 @@
 import { redirectIfNotAuthenticated } from '@/utils/redirectIfNotAuthenticated';
 import { createClient } from '@/utils/supabase/server';
 import SubmitButton from '../_components/SubmitButton';
-import { createNote } from '../(notes)/actions';
+import { createNote, deleteNote } from '../(notes)/actions';
 import LogoutButton from '../_components/LogoutButton';
+import Link from 'next/link';
+import ConfirmButton from '../_components/ConfirmButton';
 
 
 
@@ -69,12 +71,6 @@ export default async function DashboardPage() {
         </div>
 
         {/* Notes List */}
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-            Failed to load notes.
-          </div>
-        )}
-
         {!notes?.length ? (
           <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-10 text-center text-zinc-400">
             You don’t have any notes yet. Create your first one above.
@@ -82,10 +78,34 @@ export default async function DashboardPage() {
         ) : (
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {notes.map((n) => (
-              <li key={n.id} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl hover:bg-white/[0.06] transition">
-                <h3 className="text-base font-medium text-zinc-100">{n.title}</h3>
+              <li
+                key={n.id}
+                className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl hover:bg-white/[0.06] transition"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <Link
+                    href={`/notes/${n.id}`}
+                    className="text-base font-medium text-zinc-100 hover:underline underline-offset-4"
+                  >
+                    {n.title}
+                  </Link>
+
+                  {/* Inline delete */}
+                  <form action={deleteNote}>
+                    <input type="hidden" name="id" value={n.id} />
+                    <ConfirmButton
+                      confirmText="Delete this note?"
+                      className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-200 hover:bg-red-500/20"
+                    >
+                      Delete
+                    </ConfirmButton>
+                  </form>
+                </div>
+
                 {n.content && (
-                  <p className="mt-1 text-sm text-zinc-400 whitespace-pre-wrap">{n.content}</p>
+                  <p className="mt-1 line-clamp-3 text-sm text-zinc-400 whitespace-pre-wrap">
+                    {n.content}
+                  </p>
                 )}
                 <div className="mt-3 text-xs text-zinc-500">
                   {new Date(n.updated_at || n.created_at).toLocaleString()}
